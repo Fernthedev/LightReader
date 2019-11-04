@@ -95,5 +95,5 @@ public class CustomLightLine extends ILightLine {
 ```
 After you have your custom line instance, you can register the Light Line instance for the parser to recognize using the
 ```java
-LightParser.registerLightLine(new CustomLightLine(NullObject.NULL_OBJECT)); // All the data 
+LightParser.registerLightLine(new CustomLightLine(NullObject.NULL_OBJECT)); // The object is almost an instance with almost no data.
 ```
