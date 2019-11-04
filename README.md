@@ -3,6 +3,9 @@ This is an API for reading simple scripts that manipulates GPIO pins
 
 
 ## Download: 
+
+[![](https://jitpack.io/v/Fernthedev/LightReader.svg)](https://jitpack.io/#Fernthedev/LightReader)
+
 ### Maven: 
 ```xml
 <repositories>
