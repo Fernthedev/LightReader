@@ -1,6 +1,6 @@
-package io.github.fernthedev.light.api;
+package com.github.fernthedev.light.api;
 
-import io.github.fernthedev.light.api.lines.ILightLine;
+import com.github.fernthedev.light.api.lines.ILightLine;
 import lombok.Data;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;

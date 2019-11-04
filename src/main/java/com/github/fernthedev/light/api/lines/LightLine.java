@@ -1,6 +1,6 @@
-package io.github.fernthedev.light.api.lines;
+package com.github.fernthedev.light.api.lines;
 
-import io.github.fernthedev.light.api.NullObject;
+import com.github.fernthedev.light.api.NullObject;
 import lombok.NonNull;
 
 public class LightLine extends ILightLine {

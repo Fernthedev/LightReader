@@ -1,9 +1,9 @@
-package io.github.fernthedev.light.api.lines;
+package com.github.fernthedev.light.api.lines;
 
-import io.github.fernthedev.light.LightManager;
-import io.github.fernthedev.light.api.NullObject;
-import io.github.fernthedev.light.api.annotations.LineArgument;
-import io.github.fernthedev.light.api.annotations.LineData;
+import com.github.fernthedev.light.LightManager;
+import com.github.fernthedev.light.api.NullObject;
+import com.github.fernthedev.light.api.annotations.LineArgument;
+import com.github.fernthedev.light.api.annotations.LineData;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NonNull;

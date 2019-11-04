@@ -1,4 +1,4 @@
-package io.github.fernthedev.light.exceptions;
+package com.github.fernthedev.light.exceptions;
 
 /**
  * Is thrown when the Pi4J libraries cannot be found

@@ -1,13 +1,14 @@
-package io.github.fernthedev.light.api;
+package com.github.fernthedev.light.api;
 
 
-import io.github.fernthedev.light.LightManager;
-import io.github.fernthedev.light.api.annotations.LineArgument;
-import io.github.fernthedev.light.api.annotations.LineData;
+import com.github.fernthedev.light.LightManager;
+import com.github.fernthedev.light.api.lines.*;
+import com.github.fernthedev.light.exceptions.LightFileParseException;
+import com.github.fernthedev.light.api.annotations.LineArgument;
+import com.github.fernthedev.light.api.annotations.LineData;
 import io.github.fernthedev.light.api.lines.*;
-import io.github.fernthedev.light.exceptions.FileIsFolderException;
-import io.github.fernthedev.light.exceptions.LightCommentNoEndException;
-import io.github.fernthedev.light.exceptions.LightFileParseException;
+import com.github.fernthedev.light.exceptions.FileIsFolderException;
+import com.github.fernthedev.light.exceptions.LightCommentNoEndException;
 import lombok.NonNull;
 import okio.*;
 import org.apache.commons.io.FilenameUtils;

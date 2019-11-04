@@ -1,9 +1,9 @@
-package io.github.fernthedev.light;
+package com.github.fernthedev.light;
 
 import com.pi4j.io.gpio.*;
 import com.pi4j.io.gpio.exception.GpioPinExistsException;
 import com.pi4j.system.SystemInfo;
-import io.github.fernthedev.light.exceptions.NoPi4JLibsFoundException;
+import com.github.fernthedev.light.exceptions.NoPi4JLibsFoundException;
 import lombok.Getter;
 import lombok.NonNull;
 import org.slf4j.Logger;

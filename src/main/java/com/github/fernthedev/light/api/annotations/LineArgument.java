@@ -1,4 +1,4 @@
-package io.github.fernthedev.light.api.annotations;
+package com.github.fernthedev.light.api.annotations;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

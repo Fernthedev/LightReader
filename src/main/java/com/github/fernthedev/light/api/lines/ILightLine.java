@@ -1,9 +1,9 @@
-package io.github.fernthedev.light.api.lines;
+package com.github.fernthedev.light.api.lines;
 
-import io.github.fernthedev.light.api.LightParser;
-import io.github.fernthedev.light.api.NullObject;
-import io.github.fernthedev.light.api.annotations.LineData;
-import io.github.fernthedev.light.exceptions.LightFileParseException;
+import com.github.fernthedev.light.api.LightParser;
+import com.github.fernthedev.light.exceptions.LightFileParseException;
+import com.github.fernthedev.light.api.NullObject;
+import com.github.fernthedev.light.api.annotations.LineData;
 import lombok.*;
 
 @Data

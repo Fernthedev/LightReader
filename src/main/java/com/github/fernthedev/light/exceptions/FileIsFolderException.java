@@ -1,6 +1,6 @@
-package io.github.fernthedev.light.exceptions;
+package com.github.fernthedev.light.exceptions;
 
-import io.github.fernthedev.light.api.lines.ILightLine;
+import com.github.fernthedev.light.api.lines.ILightLine;
 
 public class FileIsFolderException extends LightFileParseException {
     public FileIsFolderException(String message) {

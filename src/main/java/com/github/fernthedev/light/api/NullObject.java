@@ -1,4 +1,4 @@
-package io.github.fernthedev.light.api;
+package com.github.fernthedev.light.api;
 
 /**
  * Just an identifier to be used to create an no-arg instance of an object intentionally

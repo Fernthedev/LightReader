@@ -1,8 +1,8 @@
-package io.github.fernthedev.light;
+package com.github.fernthedev.light;
 
-import io.github.fernthedev.light.api.LightFile;
-import io.github.fernthedev.light.api.LightParser;
-import io.github.fernthedev.light.api.lines.ILightLine;
+import com.github.fernthedev.light.api.LightParser;
+import com.github.fernthedev.light.api.lines.ILightLine;
+import com.github.fernthedev.light.api.LightFile;
 import org.apache.commons.io.FilenameUtils;
 
 import java.io.File;
