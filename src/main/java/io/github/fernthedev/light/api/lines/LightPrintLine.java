@@ -1,6 +1,7 @@
 package io.github.fernthedev.light.api.lines;
 
 import io.github.fernthedev.light.LightManager;
+import io.github.fernthedev.light.api.NullObject;
 import io.github.fernthedev.light.api.annotations.LineArgument;
 import io.github.fernthedev.light.api.annotations.LineData;
 import lombok.Data;
@@ -23,6 +24,11 @@ public class LightPrintLine extends ILightLine {
     public LightPrintLine(ILightLine lightLine, @NonNull String print) {
         super(lightLine);
         this.print = print;
+    }
+
+    public LightPrintLine(NullObject nullObject) {
+        super(nullObject);
+        this.print = "";
     }
 
     @Override

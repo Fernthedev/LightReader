@@ -25,17 +25,22 @@ public class LightParser {
     static {
         if(!init) {
             init = true;
-            LightParser.parseList.add(new LightPinLine(0, 0, false));
-            LightParser.parseList.add(new LightSleepLine("", 0, 0));
-            LightParser.parseList.add(new LightPrintLine("", 0, ""));
+            registerLightLine(new LightPinLine(NullObject.NULL_OBJECT));
+            registerLightLine(new LightSleepLine(NullObject.NULL_OBJECT));
+            registerLightLine(new LightPrintLine(NullObject.NULL_OBJECT));
         }
     }
 
     private LightParser() {}
 
-    public static final List<ILightLine> parseList = new ArrayList<>();
 
-    public static void saveFile(@NonNull LightFile lightFile, File path) throws IOException {
+    private static final List<ILightLine> parseList = new ArrayList<>();
+
+    public static void registerLightLine(ILightLine iLightLine) {
+        parseList.add(iLightLine);
+    }
+
+    public static void saveFile(@NonNull LightFile lightFile) throws IOException {
         File file = new File(lightFile.getFile().getPath());
         if(!file.exists()) {
             file.createNewFile();
@@ -51,9 +56,9 @@ public class LightParser {
         //lightFile.setFile(Files.write(lightFile.getFile().toPath(),lightFile.toStringList(), Charset.forName("UTF-8")).toFile());
     }
 
-    public static void saveFolder(@NonNull List<LightFile> files, File path) throws IOException {
+    public static void saveFolder(@NonNull List<LightFile> files) throws IOException {
         for(LightFile lightFile : files) {
-            saveFile(lightFile,path);
+            saveFile(lightFile);
         }
     }
 
@@ -280,7 +285,7 @@ public class LightParser {
     }
 
 
-    public static String formatString(ILightLine lightLine) {
+    public static String formatLightLineToString(ILightLine lightLine) {
         StringBuilder formattedString = new StringBuilder();
 
         formattedString.append(lightLine.getArgumentName());
@@ -309,7 +314,7 @@ public class LightParser {
         return formattedString.toString();
     }
 
-    public static String formatString(Class<? extends ILightLine> lightClass) {
+    public static String formatLightLineToString(Class<? extends ILightLine> lightClass) {
         StringBuilder formattedString = new StringBuilder();
 
         if(!lightClass.isAnnotationPresent(LineData.class)) throw new IllegalArgumentException("Class does not have LineData annotation set.");

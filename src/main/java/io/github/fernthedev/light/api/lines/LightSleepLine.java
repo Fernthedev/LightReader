@@ -1,5 +1,6 @@
 package io.github.fernthedev.light.api.lines;
 
+import io.github.fernthedev.light.api.NullObject;
 import io.github.fernthedev.light.api.annotations.LineArgument;
 import io.github.fernthedev.light.api.annotations.LineData;
 import lombok.Data;
@@ -24,6 +25,11 @@ public class LightSleepLine extends ILightLine {
     public LightSleepLine(ILightLine lightLine, double sleepDouble) {
         super(lightLine);
         this.sleepDouble = sleepDouble;
+    }
+
+    public LightSleepLine(NullObject nullObject) {
+        super(nullObject);
+        this.sleepDouble = -1;
     }
 
     public static String formatString(double sleep) {

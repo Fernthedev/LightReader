@@ -3,6 +3,7 @@ package io.github.fernthedev.light.api.lines;
 import com.pi4j.io.gpio.GpioPinDigitalOutput;
 import io.github.fernthedev.light.GpioPinData;
 import io.github.fernthedev.light.LightManager;
+import io.github.fernthedev.light.api.NullObject;
 import io.github.fernthedev.light.api.annotations.LineArgument;
 import io.github.fernthedev.light.api.annotations.LineData;
 import io.github.fernthedev.light.exceptions.LightFileParseException;
@@ -53,6 +54,13 @@ public class LightPinLine extends ILightLine {
     public LightPinLine(String line,int lineNumber, boolean allPins,boolean toggle) {
         super(line,lineNumber);
     }
+
+    public LightPinLine(NullObject nullObject) {
+        super(nullObject);
+        this.pin = -1;
+        this.toggle = false;
+    }
+
 
     private void handlePins(boolean allPins,boolean toggle) {
         if(!allPins) throw new IllegalArgumentException("If not all pins specify pins");

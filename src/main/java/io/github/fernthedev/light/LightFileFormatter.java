@@ -10,6 +10,11 @@ import java.io.FileNotFoundException;
 
 public class LightFileFormatter {
 
+    /**
+     * Executes the .pia file
+     * It is async
+     * @param file
+     */
     public static void executeLightFile(File file) {
         Thread thread = new Thread(() -> {
 

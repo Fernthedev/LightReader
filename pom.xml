@@ -7,6 +7,8 @@
     <groupId>io.github.fernthedev</groupId>
     <artifactId>light-reader</artifactId>
     <version>1.0</version>
+
+
     <build>
         <plugins>
             <plugin>
@@ -19,6 +21,7 @@
             </plugin>
         </plugins>
     </build>
+
 
 
     <dependencies>
@@ -63,7 +66,6 @@
             <artifactId>slf4j-api</artifactId>
             <version>1.7.29</version>
         </dependency>
-
     </dependencies>
 
 </project>

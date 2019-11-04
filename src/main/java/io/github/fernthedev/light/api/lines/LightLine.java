@@ -1,5 +1,6 @@
 package io.github.fernthedev.light.api.lines;
 
+import io.github.fernthedev.light.api.NullObject;
 import lombok.NonNull;
 
 public class LightLine extends ILightLine {
@@ -19,6 +20,10 @@ public class LightLine extends ILightLine {
     @Override
     public @NonNull ILightLine constructLightLine(ILightLine lightLine, String[] args) {
         return lightLine;
+    }
+
+    public LightLine(NullObject nullObject) {
+        super(nullObject);
     }
 
     @Override
