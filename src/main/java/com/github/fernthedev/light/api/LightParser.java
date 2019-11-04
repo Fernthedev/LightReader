@@ -6,7 +6,6 @@ import com.github.fernthedev.light.api.lines.*;
 import com.github.fernthedev.light.exceptions.LightFileParseException;
 import com.github.fernthedev.light.api.annotations.LineArgument;
 import com.github.fernthedev.light.api.annotations.LineData;
-import io.github.fernthedev.light.api.lines.*;
 import com.github.fernthedev.light.exceptions.FileIsFolderException;
 import com.github.fernthedev.light.exceptions.LightCommentNoEndException;
 import lombok.NonNull;
