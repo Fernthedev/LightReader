@@ -16,11 +16,9 @@ import lombok.NonNull;
 @LineData(name = "pin")
 public class LightPinLine extends ILightLine {
 
-    @LineArgument
-    private int pin;
 
-    @LineArgument
-    private boolean allPins;
+    @LineArgument(classTypes = {int.class, boolean.class})
+    private Object pin;
 
     @LineArgument(name = "mode")
     private boolean toggle;
@@ -62,9 +60,9 @@ public class LightPinLine extends ILightLine {
     }
 
 
-    private void handlePins(boolean allPins,boolean toggle) {
+    private void handlePins(boolean allPins, boolean toggle) {
         if(!allPins) throw new IllegalArgumentException("If not all pins specify pins");
-        this.allPins = true;
+        this.pin = true;
         this.toggle = toggle;
     }
 
@@ -129,9 +127,14 @@ public class LightPinLine extends ILightLine {
     }
 
     @Override
+    public @NonNull ILightLine constructEmptyLightLine(ILightLine lightLine) {
+        return new LightPinLine(lightLine, 0, false);
+    }
+
+    @Override
     public void execute() {
         GpioPinDigitalOutput output;
-        if (allPins) {
+        if (pin instanceof Boolean) {
             for (GpioPinData pin : LightManager.getPinDataMap().values()) {
 
                 output = pin.getOutput();
@@ -142,14 +145,16 @@ public class LightPinLine extends ILightLine {
                     output.low();
                 }
             }
-        }else{
-            output = LightManager.getDataFromInt(pin).getOutput();
+        }else if (pin instanceof Integer) {
+            output = LightManager.getDataFromInt((int) pin).getOutput();
 
             if (isToggle()) {
                 output.high();
             } else {
                 output.low();
             }
+        } else {
+            LightManager.getLogger().error("The pin provided is not supported. Pin Object: {} type: {}", pin, pin.getClass());
         }
     }
 }

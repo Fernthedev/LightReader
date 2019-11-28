@@ -4,6 +4,7 @@ import com.github.fernthedev.light.LightManager;
 import com.github.fernthedev.light.api.NullObject;
 import com.github.fernthedev.light.api.annotations.LineArgument;
 import com.github.fernthedev.light.api.annotations.LineData;
+import com.github.fernthedev.light.api.annotations.LineRestArguments;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NonNull;
@@ -14,21 +15,22 @@ import lombok.NonNull;
 public class LightPrintLine extends ILightLine {
 
     @LineArgument(name = "message")
-    private String print;
+    @LineRestArguments
+    private String[] print;
 
     public LightPrintLine(@NonNull String line, int lineNumber, @NonNull String print) {
         super(line, lineNumber);
-        this.print = print;
+        this.print = new String[] {print};
     }
 
     public LightPrintLine(ILightLine lightLine, @NonNull String print) {
         super(lightLine);
-        this.print = print;
+        this.print = new String[] {print};
     }
 
     public LightPrintLine(NullObject nullObject) {
         super(nullObject);
-        this.print = "";
+        this.print = new String[] {""};
     }
 
     @Override
@@ -50,8 +52,28 @@ public class LightPrintLine extends ILightLine {
         return null;
     }
 
+    /**
+     * Return true if you wish to handle the arguments in {@link #constructLightLine(ILightLine, String[])}
+     *
+     * @return
+     */
+    @Override
+    public boolean requireManualArgumentHandling() {
+        return false;
+    }
+
+    @Override
+    public @NonNull ILightLine constructEmptyLightLine(ILightLine lightLine) {
+        return new LightPrintLine(lightLine, "");
+    }
+
     @Override
     public void execute() {
-        LightManager.getLogger().info(print);
+        StringBuilder stringBuilder = new StringBuilder();
+        for (String s : print) {
+            stringBuilder.append(s).append(" ");
+        }
+
+        LightManager.getLogger().info(stringBuilder.toString());
     }
 }

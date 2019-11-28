@@ -53,6 +53,11 @@ public class LightSleepLine extends ILightLine {
     }
 
     @Override
+    public @NonNull ILightLine constructEmptyLightLine(ILightLine lightLine) {
+        return new LightSleepLine(lightLine, 0);
+    }
+
+    @Override
     public void execute() {
         try {
             Thread.sleep((long) sleepDouble);

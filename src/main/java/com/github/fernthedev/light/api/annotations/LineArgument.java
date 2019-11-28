@@ -13,4 +13,21 @@ public @interface LineArgument {
 
     boolean required() default true;
 
+    /**
+     * Requires the field to be an object.
+     * Allows the reflection initiator
+     * to know what are the allowed class types
+     * it can use for instantiating
+     *
+     * Example:
+     * ```
+     * @ LineArgument(classTypes = {boolean.class, int.class}
+     * Object var; // The reflection initiator will only allow the object to be a boolean or an integer. If it's neither it will throw an exception
+     * ```
+     *
+     * @return the allowed class types
+     */
+    Class[] classTypes() default {};
 }
+
+

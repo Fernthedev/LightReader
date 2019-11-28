@@ -24,8 +24,8 @@ public class LightFileParseException extends RuntimeException {
         handleLightLine(lightLine);
     }
 
-    public LightFileParseException(ILightLine lightLine, String message, Exception exception) {
-        super(formatErrorMessage(lightLine,message),exception);
+    public LightFileParseException(ILightLine lightLine, String message, Throwable exception) {
+        super(formatErrorMessage(lightLine,message), exception);
         handleLightLine(lightLine);
     }
 
@@ -36,10 +36,6 @@ public class LightFileParseException extends RuntimeException {
 
     protected void handleLightLine(ILightLine lightLine) {
         this.lightLine = lightLine;
-    }
-
-    public void printStackTrace() {
-        super.printStackTrace();
     }
 
     protected static String formatErrorMessage(ILightLine lightLine) {

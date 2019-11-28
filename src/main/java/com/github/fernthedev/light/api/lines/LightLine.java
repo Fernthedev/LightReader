@@ -22,6 +22,11 @@ public class LightLine extends ILightLine {
         return lightLine;
     }
 
+    @Override
+    public @NonNull ILightLine constructEmptyLightLine(ILightLine lightLine) {
+        return null;
+    }
+
     public LightLine(NullObject nullObject) {
         super(nullObject);
     }
