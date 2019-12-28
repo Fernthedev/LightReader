@@ -1,13 +1,18 @@
 package com.github.fernthedev.light.animations;
 
-public abstract class AnimationRunnable implements Runnable {
+@FunctionalInterface
+public interface AnimationRunnable {
 
-    public void runAsync() {
-        new Thread(this).start();
+    void run(LedStrip ledStrip);
+
+    default void runAsync(LedStrip ledStrip) {
+        new Thread(() -> AnimationRunnable.this.run(ledStrip)).start();
     }
 
-    public void runAsync(String name) {
-        new Thread(this, name).start();
+    default void runAsync(LedStrip ledStrip, String name) {
+        new Thread(() -> AnimationRunnable.this.run(ledStrip), name).start();
     }
+
+
 
 }

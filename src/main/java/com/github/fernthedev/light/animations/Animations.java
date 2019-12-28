@@ -157,13 +157,15 @@ public class Animations implements IAnimation {
 
                 List<Object> fulfilledPar = new ArrayList<>();
 
-                fulfilledPar.add(ledStrip);
+                // No longer required
+//                fulfilledPar.add(ledStrip);
+//
+//                Parameter[] parList = new Parameter[method.getParameters().length - 1];
+//
+//
+//                System.arraycopy(method.getParameters(), 1, parList, 0, method.getParameters().length - 1);
 
-                Parameter[] parList = new Parameter[method.getParameters().length - 1];
-
-
-                System.arraycopy(method.getParameters(), 1, parList, 0, method.getParameters().length - 1);
-
+                Parameter[] parList = method.getParameters();
 
 
                 Queue<String> argQueue = new LinkedList<>(Arrays.asList(args));
@@ -247,17 +249,19 @@ public class Animations implements IAnimation {
                 if (!method.getReturnType().isAssignableFrom(AnimationRunnable.class)) {
                     throw new IllegalArgumentException("The return type must be AnimationRunnable");
                 }
+//                  No longer needed. It is provided when running the runnable
+//                if (method.getParameters().length == 0 || !method.getParameters()[0].getType().isAssignableFrom(LedStrip.class)) {
+//                    throw new IllegalArgumentException("All methods must have a LedStrip instance as the first parameter. Method: " + method.getName() + ":" + method +
+//                            "  parameter");
+//                }
+//
+//                int length = method.getParameterTypes().length - 1;
+//
+//                Class<?>[] allPars = new Class[length];
+//
+//                System.arraycopy(method.getParameterTypes(), 1, allPars, 0, length);
 
-                if (method.getParameters().length == 0 || !method.getParameters()[0].getType().isAssignableFrom(LedStrip.class)) {
-                    throw new IllegalArgumentException("All methods must have a LedStrip instance as the first parameter. Method: " + method.getName() + ":" + method +
-                            "  parameter");
-                }
-
-                int length = method.getParameterTypes().length - 1;
-
-                Class<?>[] allPars = new Class[length];
-
-                System.arraycopy(method.getParameterTypes(), 1, allPars, 0, length);
+                Class<?>[] allPars = method.getParameterTypes();
 
                 for (Class<?> par : allPars) {
 
@@ -303,110 +307,96 @@ public class Animations implements IAnimation {
 
     /**
      * Cycles through all the colors for each LED has it's own color and it follows a circle pattern repeating until the cycle begins again
-     * @param strip
      * @param waitMS
      * @return
      */
     @AnimationName(name = "rainbow_cycle", documentation = "Cycles through all the colors for each LED has it's own color and it follows a circle pattern repeating until the cycle begins again")
-    public AnimationRunnable rainbowCycle(LedStrip strip, long waitMS) {
-        return new AnimationRunnable() {
-            @Override
-            public void run() {
-
-
-                for (int color = 0; color < getColorSpace(); color++) {
-                    for (int pixel = 0; pixel < strip.getNumberOfLeds(); pixel++) {
-                        strip.setLed(pixel, wheel(
-                                (
-                                        (
-                                                color * getColorSpace()
-                                        ) / strip.getNumberOfLeds()
-                                ) % getColorSpace())
-                        );
-                    }
-                    strip.update();
-
-                    if (waitMS > 0) {
-                        try {
-                            Thread.sleep(waitMS);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                    }
-
-
+    public AnimationRunnable rainbowCycle(long waitMS) {
+        return strip -> {
+            for (int color = 0; color < getColorSpace(); color++) {
+                for (int pixel = 0; pixel < strip.getNumberOfLeds(); pixel++) {
+                    strip.setLed(pixel, wheel(
+                            (
+                                    (
+                                            color * getColorSpace()
+                                    ) / strip.getNumberOfLeds()
+                            ) % getColorSpace())
+                    );
                 }
+                strip.update();
+
+                if (waitMS > 0) {
+                    try {
+                        Thread.sleep(waitMS);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+
             }
         };
     }
 
     /**
      *
-     * @param strip
      * @param waitMS
      * @param step
      * @return
      */
     @AnimationName(name = "fade_off", documentation = "Fades all the colors to off. Step is the subtraction caused every wait in milliseconds")
-    public AnimationRunnable fadeOff(LedStrip strip, long waitMS, int step) {
+    public AnimationRunnable fadeOff(long waitMS, int step) {
         if (step == 0) step = 1;
 
         int finalStep = step;
-        return new AnimationRunnable() {
-            @Override
-            public void run() {
+        return strip -> {
 
 
-                for (int color = 0; color < getColorSpace() / finalStep; color++) {
-                    for (int pixel = 0; pixel < strip.getNumberOfLeds(); pixel++) {
-                        strip.setBrightness(strip.getBrightness() - finalStep);
-                    }
-                    strip.update();
-
-                    if (waitMS > 0) {
-                        try {
-                            Thread.sleep(waitMS);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                    }
-
-
+            for (int color = 0; color < getColorSpace() / finalStep; color++) {
+                for (int pixel = 0; pixel < strip.getNumberOfLeds(); pixel++) {
+                    strip.setBrightness(strip.getBrightness() - finalStep);
                 }
+                strip.update();
+
+                if (waitMS > 0) {
+                    try {
+                        Thread.sleep(waitMS);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+
             }
         };
     }
 
     /**
      * Blinks the LEDs
-     * @param strip
      * @param blinkTimes How many times it blinks
      * @param blinkWaitTimeMS How much time to waitMS to blink
      * @return
      */
     @AnimationName(name = "blink", documentation = "Makes the LEDs blink blink times, blinkWaitTimeMS to wait when to turn on and waitMS for the next blink cycle")
-    public AnimationRunnable blink(LedStrip strip, int blinkTimes, int blinkWaitTimeMS) {
+    public AnimationRunnable blink(int blinkTimes, int blinkWaitTimeMS) {
         if (blinkTimes == 0) blinkTimes = 5;
 
         int finalBlinkTimes = blinkTimes;
-        return new AnimationRunnable() {
-            @Override
-            public void run() {
-                for (int i = 0; i < finalBlinkTimes; i++) {
-                    // Turn off
-                    LedStrip.RGBLed[] leds = strip.allOff();
+        return strip -> {
+            for (int i = 0; i < finalBlinkTimes; i++) {
+                // Turn off
+                LedStrip.RGBLed[] leds = strip.allOff();
 
-                    // Wait
-                    try {
-                        Thread.sleep(blinkWaitTimeMS);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-
-                    // Set leds to old state
-                    strip.setLedBuffer(leds);
-                    strip.update();
+                // Wait
+                try {
+                    Thread.sleep(blinkWaitTimeMS);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
+
+                // Set leds to old state
+                strip.setLedBuffer(leds);
+                strip.update();
             }
         };
     }
@@ -414,67 +404,92 @@ public class Animations implements IAnimation {
 
     /**
      * Cycles between each LED once with each one with it's own color
-     * @param strip
      * @param waitMS
      * @return
      */
     @AnimationName(name = "rainbow_cycle_successive", documentation = "Cycles between each LED once with each one with it's own color, waiting time for the next refresh of colors")
-    public AnimationRunnable rainbowCycleSuccessive(LedStrip strip, long waitMS) {
-        return new AnimationRunnable() {
-            @Override
-            public void run() {
-                    for (int pixel = 0; pixel < strip.getNumberOfLeds(); pixel++) {
-                        strip.setLed(pixel, wheel(
-                                        (
-                                                (
-                                                        pixel * getColorSpace()
-                                                ) / strip.getNumberOfLeds()
-                                        ) % getColorSpace())
-                        );
-                        strip.update();
-                        if (waitMS > 0) {
-                            try {
-                                Thread.sleep(waitMS);
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    }
-            }
-        };
-    }
-
-    /**
-     * Cycles through all the colors with all the LEDs synced
-     * @param strip
-     * @param waitMS
-     * @return
-     */
-    @AnimationName(name = "rainbow_color", documentation = "Cycles through all the colors with all the LEDs synced, waiting time for the next refresh of colors")
-    public AnimationRunnable rainbowColor(LedStrip strip, long waitMS) {
-
-        return new AnimationRunnable() {
-            @Override
-            public void run() {
-
-                for (int color = 0; color < getColorSpace(); color++) {
-                    for (int pixel = 0; pixel < strip.getNumberOfLeds(); pixel++) {
-                        strip.setLed(pixel, wheel(
-                                        (
-
-                                                        getColorSpace()
-                                                 / strip.getNumberOfLeds() + color
-                                        ) % getColorSpace())
-                        );
-                    }
+    public AnimationRunnable rainbowCycleSuccessive(long waitMS) {
+        return strip -> {
+                for (int pixel = 0; pixel < strip.getNumberOfLeds(); pixel++) {
+                    strip.setLed(pixel, wheel(
+                                    (
+                                            (
+                                                    pixel * getColorSpace()
+                                            ) / strip.getNumberOfLeds()
+                                    ) % getColorSpace())
+                    );
                     strip.update();
-
                     if (waitMS > 0) {
                         try {
                             Thread.sleep(waitMS);
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
+                    }
+                }
+        };
+    }
+
+    /**
+     * Cycles through all the colors with all the LEDs synced
+     * @param waitMS
+     * @return
+     */
+    @AnimationName(name = "rainbow_color", documentation = "Cycles through all the colors with all the LEDs synced, waiting time for the next refresh of colors")
+    public AnimationRunnable rainbowColor(long waitMS) {
+
+        return strip1 -> {
+            for (int color = 0; color < getColorSpace(); color++) {
+                for (int pixel = 0; pixel < strip1.getNumberOfLeds(); pixel++) {
+                    strip1.setLed(pixel, wheel(
+                                    (
+
+                                                    getColorSpace()
+                                             / strip1.getNumberOfLeds() + color
+                                    ) % getColorSpace())
+                    );
+                }
+                strip1.update();
+
+                if (waitMS > 0) {
+                    try {
+                        Thread.sleep(waitMS);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+            }
+        };
+    }
+
+    /**
+     * Fills the end of the LED to the start
+     * @return
+     */
+    @AnimationName(name = "fill_from_back", documentation = "Fills the end of the LED to the start")
+    public AnimationRunnable fillFromBack(long waitMS) {
+
+        if (waitMS < 0) waitMS = 2;
+
+        long finalWaitMS = waitMS;
+        return strip1 -> {
+            for (int pixel = 0; pixel < strip1.getNumberOfLeds(); pixel++) {
+                float brightness = strip1.getBrightness();
+                strip1.setBrightness(0);
+                for (int reversePixel = strip1.getNumberOfLeds() - 1; reversePixel >= pixel; reversePixel--) {
+//                    System.out.println(reversePixel + " num " + strip1.getNumberOfLeds() + " max " + pixel + "pix");
+                    for (int k = 0; k < pixel; k++) {
+                        strip1.setBrightness(k, brightness);
+                    }
+
+                    strip1.setBrightness(reversePixel, brightness);
+                    strip1.update();
+
+                    try {
+                        Thread.sleep(finalWaitMS);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
                     }
 
                 }
@@ -484,40 +499,13 @@ public class Animations implements IAnimation {
 
     /**
      * Fills the end of the LED to the start
-     * @param strip
      * @return
      */
-    @AnimationName(name = "fill_from_back", documentation = "Fills the end of the LED to the start")
-    public AnimationRunnable fillFromBack(LedStrip strip, long waitMS) {
-
-        if (waitMS < 0) waitMS = 2;
-
-        long finalWaitMS = waitMS;
-        return new AnimationRunnable() {
-            @Override
-            public void run() {
-                int pos = 0;
-                for (int pixel = 0; pixel < strip.getNumberOfLeds(); pixel++) {
-                    float brightness = strip.getBrightness();
-                    strip.setBrightness(0);
-                    for (int reversePixel = strip.getNumberOfLeds(); reversePixel > pixel; reversePixel--) {
-
-                        for (int k = 0; k < pixel; k++) {
-                            strip.setBrightness(k, brightness);
-                        }
-
-                        strip.setBrightness(reversePixel, brightness);
-                        strip.update();
-
-                        try {
-                            Thread.sleep(finalWaitMS);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-
-                    }
-                }
-            }
+    @AnimationName(name = "fill_color", documentation = "Fills the end of the LED to the start")
+    public AnimationRunnable fillColor(int red, int green, int blue) {
+        return strip -> {
+            strip.fill(red, green, blue);
+            strip.update();
         };
     }
 

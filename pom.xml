@@ -6,7 +6,7 @@
 
     <groupId>com.github.Fernthedev</groupId>
     <artifactId>LightReader</artifactId>
-    <version>1.2</version>
+    <version>1.2.1</version>
 
 
     <build>

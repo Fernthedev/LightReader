@@ -13,6 +13,7 @@ import lombok.NonNull;
 import lombok.ToString;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @EqualsAndHashCode(callSuper = true)
@@ -52,6 +53,13 @@ public class LightAnimationLine extends ILightLine {
         super(line, lineNumber);
     }
 
+    /**
+     *
+     * @param lightLine The light line for getting the position and arguments
+     * @param args The arguments provided in the command
+     * @deprecated New method uses reflection for instantiating. Only use if using classes or specific ways of instantiating the variables and handling any other part of the construction that requires the variables.
+     * @return
+     */
     @Override
     @Deprecated
     public @NonNull ILightLine constructLightLine(ILightLine lightLine, String[] args) {
@@ -75,14 +83,9 @@ public class LightAnimationLine extends ILightLine {
 
                 float brightness = Float.parseFloat(restArguments[1]);
 
-
                 ledStrip = new LedStrip(amountOfLED, brightness);
 
-                List<String> methodArgs = new ArrayList<>();
-
-                for (int i = 2; i < restArguments.length; i++) {
-                    methodArgs.add(restArguments[i]);
-                }
+                List<String> methodArgs = new ArrayList<>(Arrays.asList(restArguments).subList(2, restArguments.length));
 
                 animationRunnable = Animations.runAnimation(animationName, ledStrip, methodArgs.toArray(new String[0]));
 
@@ -99,9 +102,9 @@ public class LightAnimationLine extends ILightLine {
     @Override
     public void execute() {
         if (runMode == RUN_MODE.ASYNC) {
-            animationRunnable.runAsync();
+            animationRunnable.runAsync(ledStrip);
         } else {
-            animationRunnable.run();
+            animationRunnable.run(ledStrip);
         }
     }
 }

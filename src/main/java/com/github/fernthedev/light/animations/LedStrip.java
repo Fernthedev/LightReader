@@ -39,7 +39,7 @@ public final class LedStrip {
     }
 
     public void setBrightness(int pin, float brightness) {
-        ledBuffer[pin - 1].setBrightness(brightness);
+        ledBuffer[pin].setBrightness(brightness);
     }
 
     private boolean suspendUpdates = false;
@@ -70,6 +70,69 @@ public final class LedStrip {
 
         this.brightness = brightness;
     }
+//
+//    /**
+//     * Initialize a led strip.
+//     *
+//     * Creates the LED strip from all the LED lights it can recognize
+//     *
+//     * @param brightness   the overall brightness of the leds
+//     * @throws IllegalArgumentException
+//     */
+//    public LedStrip(final float brightness) throws IllegalArgumentException {
+//        if (brightness < 0 || brightness > 1.0) {
+//            throw new IllegalArgumentException("Brightness must be between 0.0 and 1.0");
+//        }
+//
+//        numberOfLeds = 0;
+//
+//
+//        while (numberOfLeds < 600) {
+//            this.numberOfLeds++;
+//            this.ledBuffer = new RGBLed[numberOfLeds];
+//            for (int i = 0; i < numberOfLeds; i++) {
+//                ledBuffer[i] = new RGBLed().setBrightness(GAMMA_LENGTH);
+//            }
+//
+//            final byte[] packet = new byte[numberOfLeds * 3];
+//
+//            for (int i = 0; i < numberOfLeds; i++) {
+//                packet[i * 3] = ledBuffer[i].getGreenByte();
+//                packet[(i * 3) + 1] = ledBuffer[i].getRed();
+//                packet[(i * 3) + 2] = ledBuffer[i].getBlue();
+//            }
+//
+//            System.out.println("The LED number is " + this.numberOfLeds + " Updating now.");
+//
+////            try {
+////                Thread.sleep(10);
+////            } catch (InterruptedException e) {
+////                e.printStackTrace();
+////            }
+//
+//            int status = -1;
+//            try {
+//                // Update the strand
+//                status = Spi.wiringPiSPIDataRW(0, packet, this.numberOfLeds * 3);
+//
+//                byte[] endPacket = {(byte) 0x00};
+//
+//                // Flush the update
+//                Spi.wiringPiSPIDataRW(0, endPacket, 1);
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
+//
+//
+//
+//            if (status != 0) {
+//                System.err.println("The status is " + status + ". Not recognized. The LEDs might not be connected or the amount of LEDs is incorrect");
+//            }
+//
+//        }
+//
+//        this.brightness = brightness;
+//    }
 
     /**
      * @param suspendUpdates if true, the trip wil ignore updates
@@ -232,8 +295,16 @@ public final class LedStrip {
             packet[(i * 3) + 2] = ledBuffer[i].getBlue();
         }
 
-        // Update the strand
-        Spi.wiringPiSPIDataRW(0, packet, this.numberOfLeds * 3);
+        try {
+            // Update the strand
+            Spi.wiringPiSPIDataRW(0, packet, this.numberOfLeds * 3);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+//        if (status != 0) {
+//            System.err.println("The status is " + status + ". Not recognized. The LEDs might not be connected or the amount of LEDs is incorrect");
+//        }
 
         byte[] endPacket = {(byte) 0x00};
 
@@ -306,8 +377,9 @@ public final class LedStrip {
             color.setColor(red, green, blue);
         }
 
-        public void setBrightness(float brightness) {
+        public RGBLed setBrightness(float brightness) {
             this.brightness = brightness;
+            return this;
         }
 
         /**
