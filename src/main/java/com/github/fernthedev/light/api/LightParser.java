@@ -1,8 +1,8 @@
 package com.github.fernthedev.light.api;
 
 
+import com.github.fernthedev.fernutils.reflection.ReflectionUtil;
 import com.github.fernthedev.light.LightManager;
-import com.github.fernthedev.light.ReflectionUtil;
 import com.github.fernthedev.light.api.annotations.LineArgument;
 import com.github.fernthedev.light.api.annotations.LineData;
 import com.github.fernthedev.light.api.annotations.LineRestArguments;
@@ -25,23 +25,19 @@ public class LightParser {
 
     private static LightParser lightParser;
 
-    private static boolean init = false;
     static {
-        if(!init) {
-            parseList = new ArrayList<>();
-            init = true;
-            registerLightLine(new LightPinLine(NullObject.NULL_OBJECT));
-            registerLightLine(new LightSleepLine(NullObject.NULL_OBJECT));
-            registerLightLine(new LightPrintLine(NullObject.NULL_OBJECT));
-            registerLightLine(new LightAnimationLine(NullObject.NULL_OBJECT));
-            lightParser = new LightParser();
-        }
+        registeredLightLines = new ArrayList<>();
+        registerLightLine(new LightPinLine(NullObject.NULL_OBJECT));
+        registerLightLine(new LightSleepLine(NullObject.NULL_OBJECT));
+        registerLightLine(new LightPrintLine(NullObject.NULL_OBJECT));
+        registerLightLine(new LightAnimationLine(NullObject.NULL_OBJECT));
+        lightParser = new LightParser();
     }
 
     private LightParser() {}
 
 
-    private static List<ILightLine> parseList;
+    private static List<ILightLine> registeredLightLines;
 
     public static void registerLightLine(ILightLine iLightLine) {
         if(!iLightLine.getClass().isAnnotationPresent(LineData.class)) throw new IllegalArgumentException("Class does not have LineData annotation set.");
@@ -88,7 +84,7 @@ public class LightParser {
 
         }
 
-        parseList.add(iLightLine);
+        registeredLightLines.add(iLightLine);
     }
 
     public static void saveFile(@NonNull LightFile lightFile) throws IOException {
@@ -178,7 +174,7 @@ public class LightParser {
 
                         if(message.replaceAll("\\}","").replaceAll("\\\\}","").endsWith("}") && isPar) {
                             isPar = false;
-                            messageWord.add(fullMessage + message.replaceAll("\\}","").replaceAll("\\\\}","").substring('}'));
+                            messageWord.add(fullMessage + message.replaceAll("}","").replaceAll("\\\\}","").substring('}'));
                             fullMessage = new StringBuilder();
                         }
 
@@ -262,55 +258,10 @@ public class LightParser {
                     continue;
                 }
 
-                boolean foundOnList = false;
-
-                for (ILightLine iLightLine : parseList) {
-                    if(iLightLine.getArgumentName().equalsIgnoreCase(argumentStart)) {
-
-                        if (iLightLine.requireManualArgumentHandling()) {
-                            lightLines.add(iLightLine.constructLightLine(lightLine, args));
-                        } else {
-                            try {
-                                Map<Field, Object> map = parseObjects(iLightLine, Arrays.asList(args));
-
-                                ILightLine newLightLine = iLightLine.constructEmptyLightLine(lightLine);
+                lightLines.add(parseLine(lightLine, argumentStart, args));
 
 
-                                boolean handleRestArguments = false;
 
-                                for (Field field : map.keySet()) {
-
-                                    Field lightField = newLightLine.getClass().getDeclaredField(field.getName());
-
-                                    lightField.setAccessible(true);
-                                    lightField.set(newLightLine, map.get(field));
-
-
-                                    if(field.isAnnotationPresent(LineRestArguments.class)) {
-                                        handleRestArguments = true;
-                                    }
-
-                                }
-
-                                if (handleRestArguments) newLightLine.validateRestArguments();
-
-                                lightLines.add(newLightLine);
-
-
-                            } catch (IllegalArgumentException e) {
-                                System.out.println("Provided arguments: " + Arrays.toString(args));
-                                e.printStackTrace();
-                            }
-                        }
-
-                        foundOnList = true;
-                    }
-                }
-
-
-                if(!foundOnList) {
-                    throw new LightFileParseException(lightLine, "The line could not be parsed correctly at the start. Unrecognized: \"" + argumentStart + "\"");
-                }
 
 //                if (argumentStart.equalsIgnoreCase("print") && args.length > 1) {
 //                    StringBuilder st = new StringBuilder();
@@ -389,6 +340,53 @@ public class LightParser {
         return new LightFile(file, lightLines);
     }
 
+
+    private static ILightLine parseLine(ILightLine lightLine, String command, String[] args) throws IllegalAccessException, NoSuchFieldException {
+
+
+        for (ILightLine iLightLine : registeredLightLines) {
+            if(iLightLine.getArgumentName().equalsIgnoreCase(command)) {
+
+                if (iLightLine.requireManualArgumentHandling()) {
+                    iLightLine.constructLightLine(lightLine, args);
+                } else {
+                    try {
+                        Map<Field, Object> map = parseObjects(iLightLine, Arrays.asList(args));
+
+                        ILightLine newLightLine = iLightLine.constructEmptyLightLine(lightLine);
+
+
+                        boolean handleRestArguments = false;
+
+                        for (Field field : map.keySet()) {
+
+                            Field lightField = newLightLine.getClass().getDeclaredField(field.getName());
+
+                            lightField.setAccessible(true);
+                            lightField.set(newLightLine, map.get(field));
+
+
+                            if(field.isAnnotationPresent(LineRestArguments.class)) {
+                                handleRestArguments = true;
+                            }
+
+                        }
+
+                        if (handleRestArguments) newLightLine.validateRestArguments();
+
+                        lightLine = newLightLine;
+
+
+                    } catch (IllegalArgumentException e) {
+                        LightManager.getLogger().debug("Provided arguments: " + Arrays.toString(args));
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+
+        throw new LightFileParseException(lightLine, "The line could not be parsed correctly at the start. Unrecognized: \"" + command + "\"");
+    }
 
     public static String formatLightLineToString(ILightLine lightLine) {
         StringBuilder formattedString = new StringBuilder();

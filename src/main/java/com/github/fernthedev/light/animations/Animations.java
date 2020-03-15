@@ -1,7 +1,7 @@
 package com.github.fernthedev.light.animations;
 
+import com.github.fernthedev.fernutils.reflection.ReflectionUtil;
 import com.github.fernthedev.light.LightManager;
-import com.github.fernthedev.light.ReflectionUtil;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NonNull;

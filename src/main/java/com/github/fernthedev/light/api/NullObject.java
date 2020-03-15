@@ -5,6 +5,6 @@ package com.github.fernthedev.light.api;
  */
 public class NullObject {
 
-    public final static NullObject NULL_OBJECT = new NullObject();
+    public static final NullObject NULL_OBJECT = new NullObject();
 
 }

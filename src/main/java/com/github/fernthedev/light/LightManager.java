@@ -69,6 +69,7 @@ public class LightManager {
                     pins = RaspiPin.allPins(SystemInfo.getBoardType());
                 } catch (IOException | InterruptedException e) {
                     logger.error(e.getMessage(), e);
+                    Thread.currentThread().interrupt();
                 }
 
                 try {
