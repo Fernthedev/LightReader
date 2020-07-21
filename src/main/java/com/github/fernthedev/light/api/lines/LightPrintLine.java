@@ -4,7 +4,7 @@ import com.github.fernthedev.light.LightManager;
 import com.github.fernthedev.light.api.NullObject;
 import com.github.fernthedev.light.api.annotations.LineArgument;
 import com.github.fernthedev.light.api.annotations.LineData;
-import com.github.fernthedev.light.api.annotations.LineRestArguments;
+import com.github.fernthedev.light.api.annotations.LineUnparsedArguments;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NonNull;
@@ -15,7 +15,7 @@ import lombok.NonNull;
 public class LightPrintLine extends ILightLine {
 
     @LineArgument(name = "message")
-    @LineRestArguments
+    @LineUnparsedArguments
     private String[] print;
 
     public LightPrintLine(@NonNull String line, int lineNumber, @NonNull String print) {

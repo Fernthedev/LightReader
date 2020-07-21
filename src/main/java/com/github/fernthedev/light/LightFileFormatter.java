@@ -16,16 +16,14 @@ public class LightFileFormatter {
      * @param file
      */
     public static void executeLightFile(File file) {
-        Thread thread = new Thread(() -> {
 
-            LightFile lightFile = LightParser.parseFile(file);
+        LightFile lightFile = LightParser.parseFile(file);
 
-            for(ILightLine curLine : lightFile.getLineList()) {
-                curLine.execute();
-            }
-        },"LightFileReader");
+        for (ILightLine curLine : lightFile.getLineList()) {
+            curLine.execute();
+        }
 
-        thread.start();
+
     }
 
     /**

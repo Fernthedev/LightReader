@@ -7,12 +7,11 @@ import com.pi4j.io.gpio.GpioPinDigitalOutput;
 import com.github.fernthedev.light.api.NullObject;
 import com.github.fernthedev.light.api.annotations.LineArgument;
 import com.github.fernthedev.light.api.annotations.LineData;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NonNull;
+import lombok.*;
 
 @EqualsAndHashCode(callSuper = true)
-@Data
+@ToString
+@Getter
 @LineData(name = "pin")
 public class LightPinLine extends ILightLine {
 

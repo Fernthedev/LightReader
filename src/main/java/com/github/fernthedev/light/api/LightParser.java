@@ -5,7 +5,7 @@ import com.github.fernthedev.fernutils.reflection.ReflectionUtil;
 import com.github.fernthedev.light.LightManager;
 import com.github.fernthedev.light.api.annotations.LineArgument;
 import com.github.fernthedev.light.api.annotations.LineData;
-import com.github.fernthedev.light.api.annotations.LineRestArguments;
+import com.github.fernthedev.light.api.annotations.LineUnparsedArguments;
 import com.github.fernthedev.light.api.lines.*;
 import com.github.fernthedev.light.exceptions.FileIsFolderException;
 import com.github.fernthedev.light.exceptions.LightCommentNoEndException;
@@ -22,22 +22,43 @@ import java.util.*;
 
 public class LightParser {
 
-
-    private static LightParser lightParser;
+    private static final List<ILightLine> registeredLightLines = new ArrayList<>();
 
     static {
-        registeredLightLines = new ArrayList<>();
         registerLightLine(new LightPinLine(NullObject.NULL_OBJECT));
         registerLightLine(new LightSleepLine(NullObject.NULL_OBJECT));
         registerLightLine(new LightPrintLine(NullObject.NULL_OBJECT));
         registerLightLine(new LightAnimationLine(NullObject.NULL_OBJECT));
-        lightParser = new LightParser();
     }
 
     private LightParser() {}
 
+    public static void validateField(Field field) {
+        if (!field.isAnnotationPresent(LineArgument.class) && field.isAnnotationPresent(LineUnparsedArguments.class)) throw new IllegalArgumentException("The LineUnparsedArguments field must contain a LineArgument annotation");
 
-    private static List<ILightLine> registeredLightLines;
+        LineArgument lineArgument = field.getAnnotation(LineArgument.class);
+
+
+        if(!field.isAnnotationPresent(LineUnparsedArguments.class) && lineArgument.classTypes().length > 0) {
+            for (Class<?> aClass : lineArgument.classTypes()) {
+                if(!aClass.isPrimitive() && !aClass.isAssignableFrom(String.class) && !aClass.isEnum()) {
+
+                    if(field.isAnnotationPresent(LineUnparsedArguments.class)) {
+                        LightManager.getLogger().warn("classTypes() value of annotation in field {} is unnecessary and will be ignored during parsing.", field);
+                    } else
+                        throw new IllegalArgumentException("LineArgument Class types are not primitive type or string which is not supported. Field: " + field + " ClassType: " + aClass + " type: " + aClass.getTypeName());
+
+                }
+            }
+        }
+
+        if (!field.isAnnotationPresent(LineUnparsedArguments.class) && !field.getType().isPrimitive()
+                && !field.getType().isAssignableFrom(String.class)
+                && !field.getType().isEnum()) throw new IllegalArgumentException("LineArgument Field type is not primitive type or string which is not supported. " +
+                "Field: " + field.getName() + " type: " + field.getType().getTypeName() +
+                "\nIf you want to support multiple object types, use the classTypes() {} function in annotation to define what class types are legal. They must follow the same class types allowed as a field type.");
+
+    }
 
     public static void registerLightLine(ILightLine iLightLine) {
         if(!iLightLine.getClass().isAnnotationPresent(LineData.class)) throw new IllegalArgumentException("Class does not have LineData annotation set.");
@@ -45,42 +66,22 @@ public class LightParser {
         boolean existingLineRestArgument = false;
 
         for (Field field : iLightLine.getClass().getDeclaredFields()) {
-
-            if (!field.isAnnotationPresent(LineArgument.class) && field.isAnnotationPresent(LineRestArguments.class)) throw new IllegalArgumentException("The LineRestArguments field must contain a LineArgument annotation");
-
             if (!field.isAnnotationPresent(LineArgument.class)) continue;
 
-            if (field.isAnnotationPresent(LineRestArguments.class)) {
+            validateField(field);
+
+            if (field.isAnnotationPresent(LineUnparsedArguments.class)) {
                 if (!field.getType().isAssignableFrom(String[].class)) {
-                    throw new IllegalArgumentException("The field type must be String[] if it contains LineRestArguments");
+                    throw new IllegalArgumentException("The field type must be String[] if it contains LineUnparsedArguments");
                 }
 
-                if(existingLineRestArgument) throw new IllegalArgumentException("There can only be one field with LineRestArguments annotation");
+                if(existingLineRestArgument) throw new IllegalArgumentException("There can only be one field with LineUnparsedArguments annotation");
 
                 existingLineRestArgument = true;
             }
 
 
 
-            LineArgument lineArgument = field.getAnnotation(LineArgument.class);
-
-
-                if(!field.isAnnotationPresent(LineRestArguments.class) && lineArgument.classTypes().length > 0) {
-                    for (Class<?> aClass : lineArgument.classTypes()) {
-                        if(!aClass.isPrimitive() && !aClass.isAssignableFrom(String.class) && !aClass.isEnum()) {
-
-                            if(field.isAnnotationPresent(LineRestArguments.class)) {
-                                LightManager.getLogger().warn("classTypes() value of annotation in field {} is unnecessary and will be ignored during parsing.", field);
-                            } else
-                            throw new IllegalArgumentException("LineArgument Class types are not primitive type or string which is not supported. Field: " + field + " ClassType: " + aClass + " type: " + aClass.getTypeName());
-
-                        }
-                    }
-                } if (!field.isAnnotationPresent(LineRestArguments.class) && !field.getType().isPrimitive()
-                        && !field.getType().isAssignableFrom(String.class)
-                        && !field.getType().isEnum()) throw new IllegalArgumentException("LineArgument Field type is not primitive type or string which is not supported. " +
-                    "Field: " + field.getName() + " type: " + field.getType().getTypeName() +
-                    "\nIf you want to support multiple object types, use the classTypes() {} function in annotation to define what class types are legal. They must follow the same class types allowed as a field type.");
 
         }
 
@@ -111,7 +112,7 @@ public class LightParser {
 
 
     public static LightFile parseFile(@NonNull File file) {
-        if(file.isDirectory()) {
+        if (file.isDirectory()) {
             throw new FileIsFolderException("The file provided is actually a folder.");
         }
 
@@ -136,7 +137,7 @@ public class LightParser {
                 String argumentStart = bufferedSource.readUtf8Line();
                 if (argumentStart == null) {
 
-                    if(commented) {
+                    if (commented) {
                         throw new LightCommentNoEndException(new LightLine(commented1[0] + commented1[1], commentedLineStart), "The block comment does not end with a */");
                     }
 
@@ -166,15 +167,15 @@ public class LightParser {
                         index++;
                         if (index == 1 || message.equals("")) continue;
 
-                        if (message.replaceAll("\\{","").startsWith("{") && !isPar) {
+                        if (message.replaceAll("\\{", "").startsWith("{") && !isPar) {
                             isPar = true;
                             fullMessage.append(message.substring(message.replaceAll("\\{", "").indexOf('{')));
                             parStartIndex = index;
                         }
 
-                        if(message.replaceAll("\\}","").replaceAll("\\\\}","").endsWith("}") && isPar) {
+                        if (message.replaceAll("\\}", "").replaceAll("\\\\}", "").endsWith("}") && isPar) {
                             isPar = false;
-                            messageWord.add(fullMessage + message.replaceAll("}","").replaceAll("\\\\}","").substring('}'));
+                            messageWord.add(fullMessage + message.replaceAll("}", "").replaceAll("\\\\}", "").substring('}'));
                             fullMessage = new StringBuilder();
                         }
 
@@ -209,49 +210,49 @@ public class LightParser {
 
 
                 // LINE COMMENT CHECK
-                {
-                    if (argumentStart.startsWith("//")) {
-                        continue;
-                    }
 
-                    if (argumentStart.startsWith("#")) {
-                        continue;
-                    }
-
-                    if (argumentStart.contains("//") || argumentStart.contains("#")) {
-                        int index;
-                        if (argumentStart.contains("//")) {
-                            index = argumentStart.indexOf("//");
-                        } else {
-                            index = argumentStart.indexOf('#');
-                        }
-
-                        argumentStart = argumentStart.substring(index);
-                    }
+                if (argumentStart.startsWith("//")) {
+                    continue;
                 }
+
+                if (argumentStart.startsWith("#")) {
+                    continue;
+                }
+
+                if (argumentStart.contains("//") || argumentStart.contains("#")) {
+                    int index;
+                    if (argumentStart.contains("//")) {
+                        index = argumentStart.indexOf("//");
+                    } else {
+                        index = argumentStart.indexOf('#');
+                    }
+
+                    argumentStart = argumentStart.substring(index);
+                }
+
                 // LINE COMMENT CHECK
 
                 // BLOCK COMMENT CHECK
-                {
-                    String rawArgumentLine = rawArgumentLineBuilder.toString();
-                    if (rawArgumentLine.contains("/*") && !commented) {
-                        commented = true;
-                        commented1 = rawArgumentLine.split("/\\*", 2);
 
-                        concatenateComment = commented1[0];
+                String rawArgumentLine = rawArgumentLineBuilder.toString();
+                if (rawArgumentLine.contains("/*") && !commented) {
+                    commented = true;
+                    commented1 = rawArgumentLine.split("/\\*", 2);
 
-                        commentedLineStart = lineNumber;
-                    }
+                    concatenateComment = commented1[0];
 
-                    if (rawArgumentLine.contains("*/") && commented) {
-                        String[] commented2 = commented1[1].split("\\*/", 2);
-
-                        concatenateComment += commented2[1];
-
-                        argumentStart = concatenateComment;
-                        commented = false;
-                    }
+                    commentedLineStart = lineNumber;
                 }
+
+                if (rawArgumentLine.contains("*/") && commented) {
+                    String[] commented2 = commented1[1].split("\\*/", 2);
+
+                    concatenateComment += commented2[1];
+
+                    argumentStart = concatenateComment;
+                    commented = false;
+                }
+
                 // BLOCK COMMENT CHECK
 
                 if (commented) {
@@ -259,75 +260,6 @@ public class LightParser {
                 }
 
                 lightLines.add(parseLine(lightLine, argumentStart, args));
-
-
-
-
-//                if (argumentStart.equalsIgnoreCase("print") && args.length > 1) {
-//                    StringBuilder st = new StringBuilder();
-//                    int t = 0;
-//                    for (String se : args) {
-//                        if (t > 0) st.append(" ");
-//                        st.append(se);
-//
-//                        t++;
-//                    }
-//
-//                    lightLines.add(new LightPrintLine(lightLine, st.toString()));
-//                }
-
-//                if (argumentStart.equalsIgnoreCase("pin") && args.length > 1) {
-//                    if (args[0].equalsIgnoreCase("all")) {
-//
-//
-//                        String newPar = args[1];
-//
-//                        boolean toggle;
-//
-//                        if (newPar.equalsIgnoreCase("on")) {
-//                            toggle = true;
-//                        } else if (newPar.equalsIgnoreCase("off")) {
-//                            toggle = false;
-//                        } else {
-//                            throw new LightFileParseException(lightLine, "Could not find parameter " + newPar);
-//                        }
-//
-//                        lightLines.add(new LightPinLine(lightLine, true, toggle));
-//
-//
-//                    } else if (args[0].matches("[0-9]+")) {
-//                        int pinInt = Integer.parseInt(args[0]);
-//
-//
-//                        String newPar = args[1];
-//                        boolean toggle;
-//
-//                        if (newPar.equalsIgnoreCase("on")) {
-//                            toggle = true;
-//                        } else if (newPar.equalsIgnoreCase("off")) {
-//                            toggle = false;
-//                        } else {
-//                            throw new LightFileParseException(lightLine, "Could not find parameter " + newPar);
-//                        }
-//
-//                        lightLines.add(new LightPinLine(lightLine, pinInt, toggle));
-//
-//
-//                    } else {
-//                        throw new LightFileParseException(lightLine, "Argument " + args[0] + " can only be numerical.");
-//                    }
-//                }
-
-//                if (argumentStart.equalsIgnoreCase("sleep")) {
-//                    if (args.length > 0) {
-//                        String amount = args[0];
-//                        if (amount.replaceAll("\\.", "").matches("[0-9]+")) {
-//                            double time = Double.parseDouble(amount);
-//                            lightLines.add(new LightSleepLine(lightLine, time));
-//                        }
-//                    }
-//                }
-
             }
         } catch (FileNotFoundException e) {
             LightManager.getLogger().error(e.getMessage(), e);
@@ -366,13 +298,13 @@ public class LightParser {
                             lightField.set(newLightLine, map.get(field));
 
 
-                            if(field.isAnnotationPresent(LineRestArguments.class)) {
+                            if(field.isAnnotationPresent(LineUnparsedArguments.class)) {
                                 handleRestArguments = true;
                             }
 
                         }
 
-                        if (handleRestArguments) newLightLine.validateRestArguments();
+                        if (handleRestArguments) newLightLine.validateUnparsedArguments();
 
                         lightLine = newLightLine;
 
@@ -487,7 +419,7 @@ public class LightParser {
 
             if (!field.isAnnotationPresent(LineArgument.class)) continue;
 
-            if(field.isAnnotationPresent(LineRestArguments.class)) {
+            if(field.isAnnotationPresent(LineUnparsedArguments.class)) {
                 restArgsField = field;
                 continue;
             }
@@ -517,7 +449,7 @@ public class LightParser {
                                     s.indexOf(name + "=")
                             );
 
-                    Object parsedValue = ReflectionUtil.parseObject(field.getType(), lineArgument.classTypes(), valueNoFormat);
+                    Object parsedValue = ReflectionUtil.parse(valueNoFormat, field.getType());
 
                     parsedObject.put(field, parsedValue);
 
@@ -552,7 +484,7 @@ public class LightParser {
 
             LineArgument lineArgument = field.getAnnotation(LineArgument.class);
 
-            Object parsedValue = ReflectionUtil.parseObject(field.getType(), lineArgument.classTypes(), s);
+            Object parsedValue = ReflectionUtil.parse(s, field.getType());
 
             parsedObject.put(field, parsedValue);
         }

@@ -6,7 +6,7 @@ import com.github.fernthedev.light.animations.LedStrip;
 import com.github.fernthedev.light.api.NullObject;
 import com.github.fernthedev.light.api.annotations.LineArgument;
 import com.github.fernthedev.light.api.annotations.LineData;
-import com.github.fernthedev.light.api.annotations.LineRestArguments;
+import com.github.fernthedev.light.api.annotations.LineUnparsedArguments;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NonNull;
@@ -35,7 +35,7 @@ public class LightAnimationLine extends ILightLine {
     @LineArgument(name = "animation_name")
     private String animationName;
 
-    @LineRestArguments
+    @LineUnparsedArguments
     @LineArgument
     private String[] restArguments;
 
@@ -72,11 +72,11 @@ public class LightAnimationLine extends ILightLine {
     }
 
     /**
-     * Called if you have a {@link LineRestArguments} annotation on a String[] field
+     * Called if you have a {@link LineUnparsedArguments} annotation on a String[] field
      * Use this to validate and parse the rest manually
      */
     @Override
-    public void validateRestArguments() {
+    public void validateUnparsedArguments() {
         try {
             if (restArguments.length >= 2) {
                 int amountOfLED = Integer.parseInt(restArguments[0]);

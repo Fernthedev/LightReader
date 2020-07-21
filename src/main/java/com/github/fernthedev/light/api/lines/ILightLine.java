@@ -1,6 +1,7 @@
 package com.github.fernthedev.light.api.lines;
 
 import com.github.fernthedev.light.api.LightParser;
+import com.github.fernthedev.light.api.annotations.LineUnparsedArguments;
 import com.github.fernthedev.light.exceptions.LightFileParseException;
 import com.github.fernthedev.light.api.NullObject;
 import com.github.fernthedev.light.api.annotations.LineData;
@@ -77,10 +78,10 @@ public abstract class ILightLine {
     }
 
     /**
-     * Called if you have a {@link com.github.fernthedev.light.api.annotations.LineRestArguments} annotation on a String[] field
+     * Called if you have a {@link LineUnparsedArguments} annotation on a String[] field
      * Use this to validate and parse the rest manually
      */
-    public void validateRestArguments() {}
+    public void validateUnparsedArguments() {}
 
     /**
      * Return true if you wish to handle the arguments in {@link #constructLightLine(ILightLine, String[])}

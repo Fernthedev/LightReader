@@ -12,7 +12,7 @@ import java.lang.annotation.Target;
  * the values that could not be parsed at the end
  * of the LightLine construction
  *
- * {@link ILightLine#validateRestArguments()} is called if this annotation is used.
+ * {@link ILightLine#validateUnparsedArguments()} is called if this annotation is used.
  * Use the method to parse the arguments that are used in runtime. Example usage
  * is {@link com.github.fernthedev.light.api.lines.LightAnimationLine}
  *
@@ -20,7 +20,7 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD})
-public @interface LineRestArguments {
+public @interface LineUnparsedArguments {
 
     String name() default "";
 

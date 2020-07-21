@@ -139,9 +139,6 @@ public class Animations implements IAnimation {
 
     private static final List<Class<? extends IAnimation>> animationClasses;
 
-
-    private static List<Class<?>> supportedClassTypes = new ArrayList<>(Arrays.asList(ReflectionUtil.validClassTypes));
-
     private static final Map<String, InstanceMemberPair<?, ? extends Member>> animationToMemberMap = new HashMap<>();
 
     public static @NonNull AnimationRunnable runAnimation(String name, LedStrip ledStrip, String... args) {
@@ -157,14 +154,6 @@ public class Animations implements IAnimation {
 
                 List<Object> fulfilledPar = new ArrayList<>();
 
-                // No longer required
-//                fulfilledPar.add(ledStrip);
-//
-//                Parameter[] parList = new Parameter[method.getParameters().length - 1];
-//
-//
-//                System.arraycopy(method.getParameters(), 1, parList, 0, method.getParameters().length - 1);
-
                 Parameter[] parList = method.getParameters();
 
 
@@ -179,7 +168,7 @@ public class Animations implements IAnimation {
                         continue;
                     }
 
-                    Object o = ReflectionUtil.parseObject(parameter.getType(), null, argQueue.remove());
+                    Object o = ReflectionUtil.parse(argQueue.remove(), parameter.getType());
 
                     fulfilledPar.add(o);
 
@@ -219,7 +208,19 @@ public class Animations implements IAnimation {
 
     static {
         animationClasses = new ArrayList<>();
-        supportedClassTypes.add(LedStrip.class);
+        ReflectionUtil.registerClassParser(LedStrip.class, s -> {
+
+            String[] splitArguments = s.split(":", 2);
+
+            if (splitArguments.length != 1) throw new IllegalArgumentException("Unable to parse string for LEDStrip. String: {" + s + "}");
+
+            int amountOfLED = Integer.parseInt(splitArguments[0]);
+
+            float brightness = Float.parseFloat(splitArguments[1]);
+
+            return new LedStrip(amountOfLED, brightness);
+        });
+
         instance = new Animations();
         registerAnimation(instance);
     }
@@ -249,25 +250,16 @@ public class Animations implements IAnimation {
                 if (!method.getReturnType().isAssignableFrom(AnimationRunnable.class)) {
                     throw new IllegalArgumentException("The return type must be AnimationRunnable");
                 }
-//                  No longer needed. It is provided when running the runnable
-//                if (method.getParameters().length == 0 || !method.getParameters()[0].getType().isAssignableFrom(LedStrip.class)) {
-//                    throw new IllegalArgumentException("All methods must have a LedStrip instance as the first parameter. Method: " + method.getName() + ":" + method +
-//                            "  parameter");
-//                }
-//
-//                int length = method.getParameterTypes().length - 1;
-//
-//                Class<?>[] allPars = new Class[length];
-//
-//                System.arraycopy(method.getParameterTypes(), 1, allPars, 0, length);
 
                 Class<?>[] allPars = method.getParameterTypes();
 
                 for (Class<?> par : allPars) {
 
-                    if (!ReflectionUtil.isValid(supportedClassTypes, par)) {
+                    try {
+                        ReflectionUtil.getClassParser(par);
+                    } catch (IllegalStateException e) {
                         throw new IllegalArgumentException("The method " + method.getName() + ":" + method +
-                                "  parameter " + par.getName() + " with type " + par.getTypeName() + " is not supported.");
+                                "  parameter " + par.getName() + " with type " + par.getTypeName() + " is not supported.", e);
                     }
                 }
 
@@ -332,8 +324,6 @@ public class Animations implements IAnimation {
                         e.printStackTrace();
                     }
                 }
-
-
             }
         };
     }
@@ -512,7 +502,7 @@ public class Animations implements IAnimation {
     @AllArgsConstructor
     @Getter
     private static class InstanceMemberPair<I, M extends Member> {
-        private I instance;
-        private M memberReflection;
+        private final I instance;
+        private final M memberReflection;
     }
 }

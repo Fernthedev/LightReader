@@ -17,14 +17,6 @@ public class LightManager {
 
     private static GpioController gpio;
 
-    @Synchronized
-    public static LightManager getInstance() {
-        if (!init) throw new IllegalStateException("init() was not called");
-        return instance;
-    }
-
-    private static LightManager instance;
-
     private static final Map<@NonNull Pin,@NonNull GpioPinData> pinDataMap = new HashMap<>();
 
 
@@ -55,16 +47,16 @@ public class LightManager {
     }
 
     @Synchronized
-    public static void init() {
+    public static void init(GpioController gpio) {
         if (!isInit()) {
 
             try {
 
                 init = true;
-                instance = new LightManager();
                 logger.info("Loading pi4j java");
 
-                gpio = GpioFactory.getInstance();
+                LightManager.gpio = gpio;
+
                 try {
                     pins = RaspiPin.allPins(SystemInfo.getBoardType());
                 } catch (IOException | InterruptedException e) {
