@@ -1,36 +1,18 @@
 package com.github.fernthedev.light;
 
 import com.github.fernthedev.light.exceptions.NoPi4JLibsFoundException;
-import com.pi4j.io.gpio.*;
-import com.pi4j.io.gpio.exception.GpioPinExistsException;
-import com.pi4j.system.SystemInfo;
+import com.pi4j.io.gpio.Pin;
+import com.pi4j.io.gpio.RaspiPin;
 import lombok.NonNull;
 import lombok.Synchronized;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 
 public class LightManager {
 
-    private static GpioController gpio;
-
-    private static final Map<@NonNull Pin,@NonNull GpioPinData> pinDataMap = new HashMap<>();
-
-
-    private static Pin[] pins;
-
-    @Synchronized
-    public static Map<Pin, GpioPinData> getPinDataMap() {
-        return pinDataMap;
-    }
-
-    @Synchronized
-    public static Pin[] getPins() {
-        return pins;
-    }
+    private static PinHandler pinHandler;
 
     private static final Logger logger = LoggerFactory.getLogger(LightManager.class);
 
@@ -47,36 +29,20 @@ public class LightManager {
     }
 
     @Synchronized
-    public static void init(GpioController gpio) {
+    public static void init(@NonNull PinHandler pinHandler) {
         if (!isInit()) {
-
+            LightManager.pinHandler = pinHandler;
             try {
 
                 init = true;
                 logger.info("Loading pi4j java");
 
-                LightManager.gpio = gpio;
 
-                try {
-                    pins = RaspiPin.allPins(SystemInfo.getBoardType());
-                } catch (IOException | InterruptedException e) {
-                    logger.error(e.getMessage(), e);
-                    Thread.currentThread().interrupt();
-                }
-
-                try {
-                    if (pins != null) {
-                        for (Pin pin : pins) {
-                            pinDataMap.put(pin, new GpioPinData(gpio.provisionDigitalOutputPin(pin, "LightManager" + pin.getName(), PinState.HIGH), pin, pin.getAddress()));
-                        }
-                    }
-                } catch (GpioPinExistsException e) {
-                    logger.error("Unable to check {}", e.getMessage());
-                }
             } catch (UnsatisfiedLinkError | IllegalArgumentException e) {
                 throw new NoPi4JLibsFoundException("Unable to find Pi4J Libraries", e);
             }
         }
+        else throw new IllegalStateException("Already initialized");
     }
 
     private LightManager() {}
@@ -89,15 +55,7 @@ public class LightManager {
 
         logger.debug(pin.toString());
 
-        if(getPinDataMap().get(pin) == null) {
-            getPinDataMap().put(pin, new GpioPinData(gpio.provisionDigitalOutputPin(pin, "GPIOData" + pinInt, PinState.HIGH), pin, pinInt));
-        }
-
-
-        // logger.info("CHecked " + lightManager.getPinDataMap().get(pin));
-        //  logger.info("List: " + lightManager.getPinDataMap().keySet().toString());
-
-        return getPinDataMap().get(pin);
+        return pinHandler.getPin(pin);
     }
 
     /**
@@ -108,14 +66,9 @@ public class LightManager {
     @Synchronized
     private static Pin getPinFromInt(int pin) {
         return RaspiPin.getPinByAddress(pin);
-        /*
-        for(int i =0; i < pins.length;i++) {
-            if(pin == i) {
-                return pins[i];
-            }
-        }*/
-
-        //return null;
     }
 
+    public static Map<Pin, GpioPinData> getPinDataMap() {
+        return pinHandler.getPinDataMap();
+    }
 }
