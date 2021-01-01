@@ -289,14 +289,17 @@ public class Animations implements IAnimation {
 
     public static RGBColor wheel(int pos) {
         if (pos < 85) {
-            return new RGBColor(pos * 3, 255 - pos * 3, 0);
+            return new RGBColor(pos * 3, 255 - (pos * 3), 0);
         } else if (pos < 170) {
-            return new RGBColor(255 - pos * 3, 0, pos * 3);
+            pos -= 85;
+            return new RGBColor(255 - (pos * 3), 0, pos * 3);
         } else {
-            return new RGBColor(0, pos * 3, 255 - pos * 3);
+            pos -= 170;
+            return new RGBColor(0, pos * 3, 255 - (pos * 3));
         }
     }
 
+    //
     /**
      * Cycles through all the colors for each LED has it's own color and it follows a circle pattern repeating until the cycle begins again
      * @param waitMS
@@ -308,11 +311,7 @@ public class Animations implements IAnimation {
             for (int color = 0; color < getColorSpace(); color++) {
                 for (int pixel = 0; pixel < strip.getNumberOfLeds(); pixel++) {
                     strip.setLed(pixel, wheel(
-                            (
-                                    (
-                                            color * getColorSpace()
-                                    ) / strip.getNumberOfLeds()
-                            ) % getColorSpace())
+                            (((pixel *  getColorSpace()) / strip.getNumberOfLeds() ) + color) % getColorSpace())
                     );
                 }
                 strip.update();
@@ -392,8 +391,14 @@ public class Animations implements IAnimation {
     }
 
 
+
     /**
-     * Cycles between each LED once with each one with it's own color
+     * Cycles between each LED once with each one with it's own color.
+     * It's like a spinner
+     *
+     *
+     *
+     *
      * @param waitMS
      * @return
      */
@@ -402,11 +407,7 @@ public class Animations implements IAnimation {
         return strip -> {
                 for (int pixel = 0; pixel < strip.getNumberOfLeds(); pixel++) {
                     strip.setLed(pixel, wheel(
-                                    (
-                                            (
-                                                    pixel * getColorSpace()
-                                            ) / strip.getNumberOfLeds()
-                                    ) % getColorSpace())
+                            ((pixel * getColorSpace()) / strip.getNumberOfLeds()) % getColorSpace())
                     );
                     strip.update();
                     if (waitMS > 0) {
@@ -422,6 +423,7 @@ public class Animations implements IAnimation {
 
     /**
      * Cycles through all the colors with all the LEDs synced
+     *
      * @param waitMS
      * @return
      */
@@ -432,11 +434,7 @@ public class Animations implements IAnimation {
             for (int color = 0; color < getColorSpace(); color++) {
                 for (int pixel = 0; pixel < strip1.getNumberOfLeds(); pixel++) {
                     strip1.setLed(pixel, wheel(
-                                    (
-
-                                                    getColorSpace()
-                                             / strip1.getNumberOfLeds() + color
-                                    ) % getColorSpace())
+                                    (getColorSpace() / strip1.getNumberOfLeds() + color) % getColorSpace())
                     );
                 }
                 strip1.update();
