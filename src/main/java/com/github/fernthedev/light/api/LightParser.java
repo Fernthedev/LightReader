@@ -306,7 +306,7 @@ public class LightParser {
 
                         if (handleRestArguments) newLightLine.validateUnparsedArguments();
 
-                        lightLine = newLightLine;
+                        return newLightLine;
 
 
                     } catch (IllegalArgumentException e) {
