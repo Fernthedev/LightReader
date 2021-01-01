@@ -16,7 +16,6 @@ public class LightManager {
 
     private static final Logger logger = LoggerFactory.getLogger(LightManager.class);
 
-    @Synchronized
     public static Logger getLogger() {
         return logger;
     }
