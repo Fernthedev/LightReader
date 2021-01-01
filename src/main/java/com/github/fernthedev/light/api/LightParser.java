@@ -1,7 +1,6 @@
 package com.github.fernthedev.light.api;
 
 
-import com.github.fernthedev.fernutils.reflection.ReflectionUtil;
 import com.github.fernthedev.light.LightManager;
 import com.github.fernthedev.light.api.annotations.LineArgument;
 import com.github.fernthedev.light.api.annotations.LineData;
@@ -306,7 +305,7 @@ public class LightParser {
 
                         if (handleRestArguments) newLightLine.validateUnparsedArguments();
 
-                        lightLine = newLightLine;
+                        return newLightLine;
 
 
                     } catch (IllegalArgumentException e) {
